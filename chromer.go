@@ -1,6 +1,7 @@
 package main
 
 // Heavily adopted and modified from: https://gist.github.com/nathankerr/38d8b0d45590741b57f5f79be336f07c/revisions
+// Get Chrome profile names from: chrome://version/
 
 /*
 #cgo CFLAGS: -x objective-c
@@ -25,26 +26,21 @@ import (
 var labelText chan string
 var profiles = []string{"Profile 3", "Profile 1"}
 
+type configBlock struct {
+	profile string
+	regex   *regexp.Regexp
+}
+
 func main() {
-	// Defaults to personal profile
-	patterns := []string{"atlassian", "atl-paas", "bitbucket", "datadog", "splunk"}
+	cfg := os.Getenv("HOME") + "/" + ".chromer"
 
-	if fh, err := os.Open(os.Getenv("HOME") + "/" + ".chromer"); err == nil {
-		var custom []string
-		scanner := bufio.NewScanner(fh)
-		for scanner.Scan() {
-			custom = append(custom, scanner.Text())
-		}
-		fh.Close()
-
-		if len(custom) > 0 {
-			patterns = custom
-		}
+	// Load the mandatory config data
+	configs, err := loadConfig(cfg)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	pattern := fmt.Sprintf("(?i)\\b(%s)\\b", strings.Join(patterns, "|"))
-	regx, _ := regexp.Compile(pattern)
-
+	// Prepare to receive the clicked URL
 	labelText = make(chan string, 1)
 	C.StartURLHandler()
 
@@ -55,7 +51,7 @@ func main() {
 			defer wg.Done()
 			for url := range labelText {
 				ui.QueueMain(func() {
-					launchURL(regx, url)
+					launchURL(configs, url)
 				})
 			}
 		}()
@@ -71,9 +67,55 @@ func HandleURL(u *C.char) {
 	labelText <- C.GoString(u)
 }
 
-func launchURL(regx *regexp.Regexp, url string) error {
+func loadConfig(cfg string) ([]configBlock, error) {
+	var err error
+	var fh *os.File
+
+	if fh, err = os.Open(cfg); err != nil {
+		return nil, err
+	}
+
+	var profile string
+	var patterns []string
+	var config []configBlock
+
+	scanner := bufio.NewScanner(fh)
+	for scanner.Scan() {
+		// Sanitized line from config
+		line := strings.TrimSpace(scanner.Text())
+
+		// Extract the profile name block
+		if strings.HasPrefix(line, "[") && strings.HasSuffix(line, "]") {
+			if len(profile) > 0 {
+				if len(patterns) > 0 {
+					config = append(config, configBlock{profile,
+						regexp.MustCompile(fmt.Sprintf("(?i)\\b(%s)\\b", strings.Join(patterns, "|")))})
+					patterns = nil
+				} else {
+					config = append(config, configBlock{profile, nil})
+				}
+			}
+
+			profile = strings.Trim(line, "[]")
+		} else if len(line) > 0 && !strings.HasPrefix(line, "#") {
+			patterns = append(patterns, line)
+		}
+	}
+	fh.Close()
+
+	// Catch the last config block
+	if len(profile) > 0 && len(patterns) > 0 {
+		config = append(config, configBlock{profile,
+			regexp.MustCompile(fmt.Sprintf("(?i)\\b(%s)\\b", strings.Join(patterns, "|")))})
+		patterns = nil
+	}
+
+	return config, nil
+}
+
+func launchURL(configs []configBlock, url string) error {
 	args := []string{"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-		fmt.Sprintf("--profile-directory=%s", getProfile(regx, url)),
+		fmt.Sprintf("--profile-directory=%s", getProfile(configs, url)),
 		"-t", url}
 
 	if _, err := syscall.ForkExec(args[0], args, nil); err != nil {
@@ -83,10 +125,17 @@ func launchURL(regx *regexp.Regexp, url string) error {
 	return nil
 }
 
-func getProfile(reg *regexp.Regexp, url string) string {
-	if reg != nil && reg.Match([]byte(url)) {
-		return profiles[1]
+func getProfile(configs []configBlock, url string) string {
+	urlBytes := []byte(url)
+	var profile string
+	for _, cfg := range configs {
+		if len(profile) == 0 && cfg.regex == nil {
+			profile = cfg.profile
+		} else if cfg.regex != nil && cfg.regex.Match(urlBytes) {
+			profile = cfg.profile
+			break
+		}
 	}
 
-	return profiles[0]
+	return profile
 }

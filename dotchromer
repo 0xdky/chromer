@@ -1,0 +1,14 @@
+# Visit: chrome://version to find your profile name
+# Copy this file with your custom filters as ~/.chromer
+
+# Personal profile
+[Profile 3]
+
+# Atlassian profile
+[Profile 1]
+atlassian
+atl-paas.net
+bb-inf.net
+bitbucket
+datadog
+splunk
