@@ -4,8 +4,10 @@ Chromer.app: *.go *.h *.m Makefile Info.plist
 	cp Info.plist Chromer.app/Contents/Info.plist
 
 install: Chromer.app
+	pkill chromer; echo
 	rm -fr /Applications/Chromer.app
 	cp -rf Chromer.app /Applications/.
+	open /Applications/Chromer.app
 
 .PHONY: open
 open: Chromer.app
@@ -20,4 +22,5 @@ clean:
 	rm -rf Chromer.app
 
 distclean: clean
+	pkill chromer; echo
 	rm -rf /Applications/Chromer.app
