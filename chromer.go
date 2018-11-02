@@ -20,11 +20,13 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/fsnotify/fsnotify"
+
 	"github.com/andlabs/ui"
 )
 
 var labelText chan string
-var profiles = []string{"Profile 3", "Profile 1"}
+var updateConfig chan bool
 
 type configBlock struct {
 	profile string
@@ -32,7 +34,13 @@ type configBlock struct {
 }
 
 func main() {
-	cfg := os.Getenv("HOME") + "/" + ".chromer"
+	cfg := os.Getenv("HOME") + "/.chromer"
+	logfh, err := os.Create(os.Getenv("HOME") + "/.chromer.log")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer logfh.Close()
+	logger := log.New(logfh, "chromer: ", log.LstdFlags)
 
 	// Load the mandatory config data
 	configs, err := loadConfig(cfg)
@@ -42,6 +50,9 @@ func main() {
 
 	// Prepare to receive the clicked URL
 	labelText = make(chan string, 1)
+	updateConfig = make(chan bool, 1)
+
+	monitorConfig(cfg, updateConfig, logger)
 	C.StartURLHandler()
 
 	wg := sync.WaitGroup{}
@@ -49,10 +60,16 @@ func main() {
 	if err := ui.Main(func() {
 		go func() {
 			defer wg.Done()
-			for url := range labelText {
-				ui.QueueMain(func() {
-					launchURL(configs, url)
-				})
+
+			for {
+				select {
+				case url := <-labelText:
+					ui.QueueMain(func() {
+						launchURL(configs, url)
+					})
+				case <-updateConfig:
+					configs, _ = loadConfig(cfg)
+				}
 			}
 		}()
 	}); err != nil {
@@ -65,6 +82,37 @@ func main() {
 //export HandleURL
 func HandleURL(u *C.char) {
 	labelText <- C.GoString(u)
+}
+
+func monitorConfig(cfg string, ch chan bool, logger *log.Logger) error {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					logger.Fatal("bailing out due to fsnotify event listening error")
+				}
+
+				logger.Println("event:", event)
+				if event.Op&(fsnotify.Write|fsnotify.Rename) != 0 {
+					logger.Println("modified file:", event.Name)
+					ch <- true
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					logger.Fatal("bailing out due to fsnotify error listening error")
+				}
+				logger.Println("error:", err)
+			}
+		}
+	}()
+
+	return watcher.Add(cfg)
 }
 
 func loadConfig(cfg string) ([]configBlock, error) {
