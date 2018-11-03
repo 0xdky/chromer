@@ -13,6 +13,7 @@
             <string>Chromer</string>
             <key>CFBundleURLSchemes</key>
             <array>
+                <string>file</string>
                 <string>http</string>
                 <string>https</string>
             </array>

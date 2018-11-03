@@ -6,9 +6,15 @@
 
 # Atlassian profile
 [Profile 1]
+# Internet URLs
 atlassian
 atl-paas.net
 bb-inf.net
 bitbucket
 datadog
 splunk
+app.launchdarkly.com
+jira
+confluence
+# Match local file paths
+xpsearch
