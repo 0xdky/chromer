@@ -1,0 +1,10 @@
+#!/bin/bash
+
+IFS=$'\n'
+for f in $(find /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform -type d -name Headers) ; do
+    line=$(echo $f|rev|awk -F"krowemarf." '{print $2":"$0}'|rev)
+    src=$(echo $line|cut -d: -f1)
+    tar=$(basename $(echo $line|cut -d: -f2))
+
+    ${ACTION} ln -s ${src} ${tar}
+done

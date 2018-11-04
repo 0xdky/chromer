@@ -1,7 +1,11 @@
-Chromer.app: *.go *.h *.m Makefile Info.plist
+Chromer.app: chromer Info.plist
+	cp Info.plist Chromer.app/Contents/Info.plist
+
+chromer: Chromer.app/Contents/MacOS/chromer
+
+Chromer.app/Contents/MacOS/chromer: *.go *.h *.m Makefile
 	mkdir -p Chromer.app/Contents/MacOS
 	go build -i -o Chromer.app/Contents/MacOS/chromer
-	cp Info.plist Chromer.app/Contents/Info.plist
 
 install: Chromer.app
 	pkill chromer; echo
