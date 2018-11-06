@@ -1,30 +1,38 @@
-Chromer.app: chromer Info.plist
-	cp Info.plist Chromer.app/Contents/Info.plist
+# -*-Makefile-*-
+# Time-stamp: <2018-11-05 11:37:59 dky>
 
-chromer: Chromer.app/Contents/MacOS/chromer
+BUILDROOT=build
 
-Chromer.app/Contents/MacOS/chromer: *.go *.h *.m Makefile
-	mkdir -p Chromer.app/Contents/MacOS
-	go build -i -o Chromer.app/Contents/MacOS/chromer
+all: $(BUILDROOT)/Chromer.app
 
-install: Chromer.app
+$(BUILDROOT)/Chromer.app: chromer Info.plist
+	cp Info.plist $(BUILDROOT)/Chromer.app/Contents/Info.plist
+
+chromer: $(BUILDROOT)/Chromer.app/Contents/MacOS/chromer
+
+$(BUILDROOT)/Chromer.app/Contents/MacOS/chromer: *.go *.h *.m Makefile frameworks
+	mkdir -p $(BUILDROOT)/Chromer.app/Contents/MacOS
+	go build -i -o $(BUILDROOT)/Chromer.app/Contents/MacOS/chromer
+
+frameworks: $(BUILDROOT)/.frameworks
+
+$(BUILDROOT)/.frameworks: macosx-frameworks
+	mkdir -p $(BUILDROOT)
+	macosx-frameworks $(BUILDROOT)
+
+.Phony: install
+install: $(BUILDROOT)/Chromer.app
 	pkill chromer; echo
 	rm -fr /Applications/Chromer.app
-	cp -rf Chromer.app /Applications/.
+	cp -rf $(BUILDROOT)/Chromer.app /Applications/.
 	open /Applications/Chromer.app
-
-.PHONY: open
-open: Chromer.app
-	open Chromer.app
-
-.PHONY: scheme
-scheme: Chromer.app
-	open https://www.gnu.org/
 
 .PHONY: clean
 clean:
-	rm -rf Chromer.app
+	rm -rf $(BUILDROOT)/Chromer.app
 
+.PHONY: distclean
 distclean: clean
 	pkill chromer; echo
 	rm -rf /Applications/Chromer.app
+	rm -rf $(BUILDROOT)

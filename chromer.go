@@ -4,7 +4,7 @@ package main
 // Get Chrome profile names from: chrome://version/
 
 /*
-#cgo CFLAGS: -I/usr/local/include/macosx -x objective-c
+#cgo CFLAGS: -Ibuild -x objective-c
 #cgo LDFLAGS: -framework Foundation
 #include "handler.h"
 */
