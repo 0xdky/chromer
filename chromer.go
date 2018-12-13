@@ -65,7 +65,7 @@ func main() {
 				select {
 				case url := <-labelText:
 					ui.QueueMain(func() {
-						launchURL(configs, url)
+						launchURL(configs, url, logger)
 					})
 				case <-updateConfig:
 					configs, _ = loadConfig(cfg)
@@ -161,10 +161,18 @@ func loadConfig(cfg string) ([]configBlock, error) {
 	return config, nil
 }
 
-func launchURL(configs []configBlock, url string) error {
-	args := []string{"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-		fmt.Sprintf("--profile-directory=%s", getProfile(configs, url)),
-		"-t", url}
+func launchURL(configs []configBlock, url string, logger *log.Logger) error {
+	browser, profile := getProfile(configs, url)
+	var args []string
+
+	if browser == "firefox" {
+		args = []string{"/usr/bin/open", "-a", "/Applications/Firefox.app", url, "--args", "-g", "-P", profile}
+	} else if browser == "chrome" {
+		args = []string{"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+			fmt.Sprintf("--profile-directory=%s", profile), "-t", url}
+	} else {
+		args = []string{"/usr/bin/open", "-a", "Safari", url}
+	}
 
 	if _, err := syscall.ForkExec(args[0], args, nil); err != nil {
 		return err
@@ -173,7 +181,7 @@ func launchURL(configs []configBlock, url string) error {
 	return nil
 }
 
-func getProfile(configs []configBlock, url string) string {
+func getProfile(configs []configBlock, url string) (string, string) {
 	urlBytes := []byte(url)
 	var profile string
 	for _, cfg := range configs {
@@ -185,5 +193,10 @@ func getProfile(configs []configBlock, url string) string {
 		}
 	}
 
-	return profile
+	fields := strings.Split(profile, "|")
+	if len(fields) == 1 {
+		return "chrome", fields[0]
+	}
+
+	return strings.ToLower(fields[0]), fields[1]
 }

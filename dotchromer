@@ -1,11 +1,11 @@
 # Visit: chrome://version to find your profile name
 # Copy this file with your custom filters as ~/.chromer
 
-# Personal profile
-[Profile 3]
+# Personal profile opened in Chrome
+[chrome|Profile 3]
 
-# Atlassian profile
-[Profile 1]
+# Atlassian profile opened in Chrome (can be chrome or firefox)
+[chrome|Profile 1]
 # Internet URLs
 atlassian
 atl-paas.net
