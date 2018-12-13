@@ -2,6 +2,7 @@
 # Time-stamp: <2018-11-05 11:37:59 dky>
 
 BUILDROOT=build
+BUILDTIME=$(shell date +%d_%b_%Y)
 
 all: $(BUILDROOT)/Chromer.app
 
@@ -26,6 +27,9 @@ install: $(BUILDROOT)/Chromer.app
 	rm -fr /Applications/Chromer.app
 	cp -rf $(BUILDROOT)/Chromer.app /Applications/.
 	open /Applications/Chromer.app
+
+zip: $(BUILDROOT)/Chromer.app
+	cd build && zip -r -9 ../Chromer.app.$(BUILDTIME).zip Chromer.app
 
 .PHONY: clean
 clean:

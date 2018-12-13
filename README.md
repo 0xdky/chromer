@@ -2,7 +2,8 @@
 
 Using a work laptop and keeping work and personal workflows is a problem.
 Chromer is a little helper to open URLs in Google Chrome browser in specific
-profile based on pattern matching the URL.
+profile based on pattern matching the URL. Preliminary support for Firefox
+is added. Defaults to Safari browser when no browser is provided in profile.
 
 This is a Mac OS specific solution but can easily be extended to any other
 platform. The Mac OS specifics are the round-about approach in getting the
