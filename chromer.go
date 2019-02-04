@@ -170,6 +170,8 @@ func launchURL(configs []configBlock, url string, logger *log.Logger) error {
 	} else if browser == "chrome" {
 		args = []string{"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
 			fmt.Sprintf("--profile-directory=%s", profile), "-t", url}
+	} else if browser == "brave" {
+		args = []string{"/usr/bin/open", "-a", "Brave Browser", url, "--args", "-t"}
 	} else {
 		args = []string{"/usr/bin/open", "-a", "Safari", url}
 	}

@@ -11,15 +11,9 @@ $(BUILDROOT)/Chromer.app: chromer Info.plist
 
 chromer: $(BUILDROOT)/Chromer.app/Contents/MacOS/chromer
 
-$(BUILDROOT)/Chromer.app/Contents/MacOS/chromer: *.go *.h *.m Makefile frameworks
+$(BUILDROOT)/Chromer.app/Contents/MacOS/chromer: *.go *.h *.m Makefile
 	mkdir -p $(BUILDROOT)/Chromer.app/Contents/MacOS
 	go build -i -o $(BUILDROOT)/Chromer.app/Contents/MacOS/chromer
-
-frameworks: $(BUILDROOT)/.frameworks
-
-$(BUILDROOT)/.frameworks: macosx-frameworks
-	mkdir -p $(BUILDROOT)
-	macosx-frameworks $(BUILDROOT)
 
 .Phony: install
 install: $(BUILDROOT)/Chromer.app
