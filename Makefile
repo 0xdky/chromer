@@ -12,8 +12,11 @@ $(BUILDROOT)/Chromer.app: chromer Info.plist
 chromer: $(BUILDROOT)/Chromer.app/Contents/MacOS/chromer
 
 $(BUILDROOT)/Chromer.app/Contents/MacOS/chromer: *.go *.h *.m Makefile
+	go mod vendor
+	mkdir -p $(BUILDROOT)/Chromer.app/config
 	mkdir -p $(BUILDROOT)/Chromer.app/Contents/MacOS
 	go build -i -o $(BUILDROOT)/Chromer.app/Contents/MacOS/chromer
+	cp dotchromer $(BUILDROOT)/Chromer.app/config/.chromer
 
 .Phony: install
 install: $(BUILDROOT)/Chromer.app

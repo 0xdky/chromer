@@ -1,20 +1,35 @@
 # Visit: chrome://version to find your profile name
 # Copy this file with your custom filters as ~/.chromer
 
-# Personal profile opened in Chrome
-[chrome|Profile 3]
+# Personal profile
+#[brave|personal]
+[safari|default]
+#[chrome|Profile 4]
+#[firefox|dhruva]
 
-# Atlassian profile opened in Chrome (can be chrome or firefox)
+# Atlassian profile
+#[brave|work]
 [chrome|Profile 1]
+#[firefox|dhruva]
 # Internet URLs
 atlassian
 atl-paas.net
+paas-inf.net
 bb-inf.net
-bitbucket
-datadog
-splunk
+bitbucket.org
+app.datadoghq.com
+signalfx.com
+splunk.com
+slack.com
 app.launchdarkly.com
+opsgenie.com
+opsg.in
 jira
 confluence
+lever.co
+console.aws.amazon.com
+http://go/
+zoom.us
+atlassianinternal.statuspage.io
 # Match local file paths
 xpsearch
