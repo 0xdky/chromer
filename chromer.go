@@ -173,7 +173,7 @@ func launchURL(configs []configBlock, url string, logger *log.Logger) error {
 	} else if browser == "brave" {
 		args = []string{"/usr/bin/open", "-a", "Brave Browser", url, "--args", "-t"}
 	} else {
-		args = []string{"/usr/bin/open", "-a", "Safari", url}
+		args = []string{"/usr/bin/open", "-a", browser, url}
 	}
 
 	if _, err := syscall.ForkExec(args[0], args, nil); err != nil {
