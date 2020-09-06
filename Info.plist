@@ -5,7 +5,7 @@
     <key>CFBundleExecutable</key>
     <string>chromer</string>
     <key>CFBundleIdentifier</key>
-    <string>com.hackworks.chromer</string>
+    <string>com.0xdky.chromer</string>
     <key>CFBundleURLTypes</key>
     <array>
         <dict>

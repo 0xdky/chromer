@@ -1,4 +1,4 @@
-module github.com/hackworks/chromer
+module github.com/0xdky/chromer
 
 go 1.13
 
