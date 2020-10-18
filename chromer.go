@@ -122,6 +122,7 @@ func loadConfig(cfg string) ([]configBlock, error) {
 	if fh, err = os.Open(cfg); err != nil {
 		return nil, err
 	}
+	defer fh.Close()
 
 	var profile string
 	var patterns []string
@@ -149,7 +150,6 @@ func loadConfig(cfg string) ([]configBlock, error) {
 			patterns = append(patterns, line)
 		}
 	}
-	fh.Close()
 
 	// Catch the last config block
 	if len(profile) > 0 && len(patterns) > 0 {
